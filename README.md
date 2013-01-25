@@ -32,6 +32,12 @@ Branch Info
    * Various release-X.Y branches exist for previous releases
    * We'd love to have your contributions, read "CONTRIBUTING.md" for process notes.
 
+Windows Specific
+================
+
+* http://www.voidspace.org.uk/python/modules.shtml#pycrypto
+* `ansible-win.py` is identical to `ansible`, but on windows it needs `.py` extension, and can't be named `ansible`
+
 Author
 ======
 
