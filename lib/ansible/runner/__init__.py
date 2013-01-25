@@ -18,7 +18,7 @@
 import multiprocessing
 import signal
 import os
-import pwd
+import getpass
 import Queue
 import random
 import traceback
@@ -149,7 +149,7 @@ class Runner(object):
             self.inventory.subset(subset)
 
         if self.transport == 'local':
-            self.remote_user = pwd.getpwuid(os.geteuid())[0]
+            self.remote_user = getpass.getuser()
 
         if module_path is not None:
             for i in module_path.split(os.pathsep):
@@ -653,7 +653,8 @@ class Runner(object):
             results = [ ReturnData(host=h, result=result_data, comm_ok=True) \
                            for h in hosts ]
             del self.host_set
-        elif self.forks > 1:
+        # Shlomo - this was breaking on windows, will dig deeper later
+        elif self.forks > 1 and sys.platform != 'win32':
             try:
                 results = self._parallel_exec(hosts)
             except IOError, ie:
