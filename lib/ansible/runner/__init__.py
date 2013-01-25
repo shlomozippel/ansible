@@ -46,12 +46,10 @@ try:
 except ImportError:
     HAS_ATFORK=False
 
-multiprocessing_runner = None
-
 ################################################
 
 
-def _executor_hook(job_queue, result_queue):
+def _executor_hook(job_queue, result_queue, multiprocessing_runner):
 
     # attempt workaround of https://github.com/newsapps/beeswithmachineguns/issues/17
     # this function also not present in CentOS 6
@@ -576,7 +574,7 @@ class Runner(object):
         workers = []
         for i in range(self.forks):
             prc = multiprocessing.Process(target=_executor_hook,
-                args=(job_queue, result_queue))
+                args=(job_queue, result_queue, self))
             prc.start()
             workers.append(prc)
 
@@ -631,8 +629,6 @@ class Runner(object):
             self.callbacks.on_no_hosts()
             return dict(contacted={}, dark={})
 
-        global multiprocessing_runner
-        multiprocessing_runner = self
         results = None
 
         # Check if this is an action plugin. Some of them are designed
@@ -653,8 +649,7 @@ class Runner(object):
             results = [ ReturnData(host=h, result=result_data, comm_ok=True) \
                            for h in hosts ]
             del self.host_set
-        # Shlomo - this was breaking on windows, will dig deeper later
-        elif self.forks > 1 and sys.platform != 'win32':
+        elif self.forks > 1:
             try:
                 results = self._parallel_exec(hosts)
             except IOError, ie:
